@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>vote13.pt — Urna Eletrônica</title>
+<meta name="description" content="Simulador de urna eletrônica. Aqui só tem um jeito: 1 3.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23c1271f' d='M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21l1.18-6.88-5-4.87 7.1-1.01z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --case:#d9d3c4;
+    --case-hi:#e8e3d6;
+    --case-lo:#bdb6a4;
+    --case-edge:#a59e8a;
+    --ink:#2b2a25;
+    --screen-bg:#eef2ea;
+    --screen-line:#cdd6cb;
+    --screen-ink:#1d2b22;
+    --green:#1f8a3b;
+    --green-d:#15692c;
+    --orange:#e07b1a;
+    --orange-d:#b85f0c;
+    --red:#c1271f;
+    --key:#f3efe6;
+    --key-lo:#cdc7b8;
+    --key-edge:#b3ac9a;
+    --backdrop:#15171a;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"IBM Plex Sans",sans-serif;
+    background:
+      radial-gradient(120% 90% at 50% 0%, #23262b 0%, var(--backdrop) 55%, #0c0d0f 100%);
+    color:#fff;
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:28px 16px 40px;
+    overflow-x:hidden;
+    -webkit-tap-highlight-color:transparent;
+  }
+  /* film grain */
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:9;opacity:.045;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap{
+    width:100%;
+    max-width:920px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:22px;
+    animation:rise .8s cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+
+  .brand{
+    text-align:center;
+    line-height:1;
+  }
+  .brand .dom{
+    font-family:"Oswald",sans-serif;
+    font-weight:700;
+    font-size:clamp(28px,6vw,46px);
+    letter-spacing:.02em;
+    background:linear-gradient(180deg,#fff,#cfd3cf);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .brand .dom b{color:#27c24c;-webkit-text-fill-color:#27c24c;}
+  .brand .sub{
+    margin-top:8px;font-size:12.5px;letter-spacing:.34em;text-transform:uppercase;
+    color:#8b8f8a;font-weight:500;
+  }
+
+  /* ===== URNA BODY ===== */
+  .urna{
+    width:100%;
+    background:
+      linear-gradient(180deg,var(--case-hi),var(--case) 18%,var(--case) 70%,var(--case-lo));
+    border-radius:22px;
+    padding:22px;
+    display:grid;
+    grid-template-columns:1.18fr .82fr;
+    gap:22px;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,.7),
+      inset 0 -3px 8px rgba(120,112,92,.55),
+      inset 0 0 0 1px var(--case-edge),
+      0 2px 4px rgba(0,0,0,.4),
+      0 30px 60px -18px rgba(0,0,0,.8),
+      0 60px 120px -40px rgba(0,0,0,.7);
+    position:relative;
+  }
+  /* subtle plastic speckle */
+  .urna::before{
+    content:"";position:absolute;inset:0;border-radius:22px;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity:.06;mix-blend-mode:multiply;
+  }
+
+  .urna__brandstrip{
+    grid-column:1 / -1;
+    display:flex;align-items:center;justify-content:space-between;
+    margin:-4px 2px 0;
+  }
+  .urna__brandstrip .gov{
+    font-family:"Oswald",sans-serif;font-weight:600;
+    color:#6f6a58;letter-spacing:.18em;font-size:11px;text-transform:uppercase;
+  }
+  .urna__brandstrip .gov b{color:#3f3b30}
+  .led{display:flex;align-items:center;gap:7px;font-size:10.5px;color:#6f6a58;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
+  .led .dot{
+    width:9px;height:9px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#56e06f,#137a2b);
+    box-shadow:0 0 8px 1px rgba(40,200,80,.8), inset 0 0 2px rgba(0,0,0,.3);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+  /* ===== SCREEN ===== */
+  .screen-frame{
+    background:linear-gradient(180deg,#b6af9d,#9b9482);
+    border-radius:14px;
+    padding:13px;
+    box-shadow:
+      inset 0 2px 5px rgba(0,0,0,.45),
+      inset 0 -1px 0 rgba(255,255,255,.3),
+      0 1px 0 rgba(255,255,255,.4);
+  }
+  .screen{
+    position:relative;
+    background:
+      linear-gradient(180deg,#f4f7f1,var(--screen-bg));
+    border-radius:7px;
+    height:100%;
+    min-height:330px;
+    padding:0;
+    overflow:hidden;
+    color:var(--screen-ink);
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.12), inset 0 0 30px rgba(120,140,120,.18);
+  }
+  /* lcd scanlines + glare */
+  .screen::before{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:4;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.022) 0 2px,transparent 2px 4px);
+  }
+  .screen::after{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+    background:linear-gradient(125deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,0) 30%);
+    mix-blend-mode:screen;
+  }
+
+  .screen__head{
+    background:var(--screen-ink);
+    color:#eef2ea;
+    font-family:"Oswald",sans-serif;font-weight:600;
+    letter-spacing:.12em;
+    padding:9px 14px;
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:14px;
+  }
+  .screen__head .cargo{text-transform:uppercase}
+  .screen__head .uf{font-family:"IBM Plex Mono";font-weight:600;opacity:.75;font-size:12px}
+
+  .screen__body{padding:14px 16px 16px;position:relative;z-index:2}
+
+  .label{font-size:12px;color:#5c6b5f;font-weight:500;letter-spacing:.01em}
+
+  .numero{
+    display:flex;align-items:center;gap:12px;margin-top:4px;
+  }
+  .numero .txt{font-size:13px;font-weight:600;color:#33433a;letter-spacing:.04em}
+  .boxes{display:flex;gap:9px}
+  .digit{
+    width:40px;height:54px;
+    background:#fbfdfa;
+    border:2px solid #243a2c;
+    border-radius:4px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:"IBM Plex Mono";font-weight:700;font-size:34px;color:#15251b;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,.08);
+  }
+  .digit.on{animation:pop .18s ease both}
+  .digit .caret{width:18px;height:3px;background:#7e8a80;border-radius:2px;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  @keyframes pop{from{transform:scale(.7);opacity:.3}to{transform:scale(1);opacity:1}}
+
+  /* candidate card */
+  .cand{display:none;margin-top:14px}
+  .cand.show{display:grid;grid-template-columns:1fr 96px;gap:12px;animation:fade .35s ease both}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .cand dl{display:grid;grid-template-columns:auto 1fr;gap:3px 8px;align-content:start}
+  .cand dt{font-size:11px;color:#5c6b5f;font-weight:500}
+  .cand dd{font-size:15px;font-weight:700;color:#15251b;line-height:1.15}
+  .cand dd.party{display:flex;align-items:center;gap:6px}
+  .star{width:15px;height:15px;flex:none;color:var(--red)}
+  .cand .vice dd{font-weight:600;font-size:13px}
+  .photo{
+    width:96px;height:120px;border-radius:4px;overflow:hidden;
+    border:2px solid #243a2c;background:#dfe6dd;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.5);
+  }
+  .photo img{
+    display:block;width:100%;height:100%;object-fit:cover;object-position:center top;
+    filter:grayscale(1) contrast(1.08) brightness(1.02);
+  }
+
+  .hint{
+    margin-top:14px;border-top:1px dashed #b6c0b6;padding-top:10px;
+    font-size:12px;line-height:1.55;color:#3a4a40;
+  }
+  .hint .k{font-family:"Oswald";font-weight:600;letter-spacing:.06em}
+  .hint .k.g{color:var(--green-d)}
+  .hint .k.o{color:var(--orange-d)}
+
+  .await{margin-top:auto;padding-top:18px;font-size:12px;color:#7a857c;font-style:italic}
+
+  /* error + fim full screen states */
+  .overlay{
+    position:absolute;inset:0;z-index:6;display:none;
+    flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    padding:24px;
+  }
+  .overlay.show{display:flex;animation:fade .25s ease both}
+  .overlay.err{background:linear-gradient(180deg,#fff0ef,#ffe2e0)}
+  .overlay.err .big{font-family:"Oswald";font-weight:700;font-size:30px;color:var(--red);letter-spacing:.04em;text-transform:uppercase}
+  .overlay.err .ico{font-size:46px;line-height:1;margin-bottom:8px;animation:shake .5s ease}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+  .overlay.err p{margin-top:10px;font-size:14px;color:#7a2420;max-width:300px;line-height:1.5}
+  .overlay.err .pill{margin-top:14px;font-family:"IBM Plex Mono";font-weight:700;background:var(--red);color:#fff;padding:6px 16px;border-radius:40px;letter-spacing:.3em;font-size:18px}
+
+  .overlay.fim{background:linear-gradient(180deg,#eef7f0,#dff0e4)}
+  .overlay.fim .fimword{
+    font-family:"Oswald";font-weight:700;font-size:clamp(54px,16vw,96px);
+    color:var(--green-d);letter-spacing:.08em;line-height:.9;
+    text-shadow:0 2px 0 rgba(255,255,255,.6);
+    animation:stamp .5s cubic-bezier(.2,1.4,.3,1) both;
+  }
+  @keyframes stamp{from{transform:scale(2.4);opacity:0}to{transform:scale(1);opacity:1}}
+  .overlay.fim p{margin-top:12px;color:#1f5733;font-size:15px;font-weight:500}
+  .overlay.fim .again{
+    margin-top:20px;border:2px solid var(--green-d);color:var(--green-d);
+    background:transparent;font-family:"IBM Plex Sans";font-weight:600;font-size:13px;
+    padding:9px 18px;border-radius:40px;cursor:pointer;transition:.2s;letter-spacing:.02em;
+  }
+  .overlay.fim .again:hover{background:var(--green-d);color:#fff}
+
+  /* ===== KEYPAD ===== */
+  .keypad{display:flex;flex-direction:column;gap:14px;justify-content:space-between}
+  .pad-and-fn{display:flex;gap:14px;flex:1}
+  .numgrid{
+    display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:9px;flex:1;
+  }
+  .fn{display:flex;flex-direction:column;gap:9px;width:104px}
+
+  .key{
+    border:none;cursor:pointer;font-family:"IBM Plex Sans",sans-serif;
+    color:var(--ink);
+    background:linear-gradient(180deg,var(--key),var(--key-lo));
+    border-radius:9px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.9),
+      inset 0 -2px 3px rgba(120,112,92,.5),
+      0 2px 0 var(--key-edge),
+      0 4px 7px rgba(0,0,0,.28);
+    transition:transform .05s, box-shadow .05s, filter .1s;
+    user-select:none;-webkit-user-select:none;
+    position:relative;
+  }
+  .key:active,.key.down{
+    transform:translateY(3px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.6),inset 0 2px 6px rgba(120,112,92,.6),0 0 0 var(--key-edge),0 1px 2px rgba(0,0,0,.3);
+    filter:brightness(.98);
+  }
+  .numgrid .key{
+    font-family:"IBM Plex Mono";font-weight:700;font-size:clamp(24px,4vw,32px);
+    min-height:54px;
+  }
+  .key.zero{grid-column:2}
+
+  .fn .key{
+    min-height:0;flex:1;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    font-weight:700;font-size:13px;letter-spacing:.06em;line-height:1;
+    color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.25);
+  }
+  .fn .blank{background:linear-gradient(180deg,#fff,#e4e0d4);color:#4a463b;text-shadow:none;box-shadow:inset 0 1px 0 #fff,inset 0 -2px 3px rgba(120,112,92,.45),0 2px 0 var(--key-edge),0 4px 7px rgba(0,0,0,.25)}
+  .fn .orange{background:linear-gradient(180deg,#f0922f,var(--orange-d));box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -2px 4px rgba(120,60,0,.5),0 2px 0 #94500a,0 4px 7px rgba(0,0,0,.3)}
+  .fn .green{background:linear-gradient(180deg,#2aa64c,var(--green-d));box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -2px 4px rgba(0,60,20,.5),0 2px 0 #0e521f,0 4px 7px rgba(0,0,0,.3)}
+  .fn .key small{font-size:8.5px;font-weight:600;opacity:.8;letter-spacing:.1em}
+
+  .foot{font-size:11.5px;color:#6c6f6a;text-align:center;letter-spacing:.02em;max-width:560px;line-height:1.5}
+  .foot a{color:#9aa09a}
+
+  @media (max-width:680px){
+    body{padding:16px 10px 30px;justify-content:flex-start}
+    .urna{grid-template-columns:1fr;gap:16px;padding:16px;border-radius:18px}
+    .screen{min-height:300px}
+    .fn{width:90px}
+    .brand .sub{letter-spacing:.22em;font-size:11px}
+  }
+  @media (max-width:380px){
+    .fn{width:78px}
+    .fn .key{font-size:11px}
+    .numgrid .key{min-height:46px}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <main class="urna" id="urna">
+      <div class="urna__brandstrip">
+        <span class="gov">Justiça <b>Eleitoral</b> · Brasil</span>
+        <span class="led"><span class="dot"></span> Liberada</span>
+      </div>
+
+      <!-- SCREEN -->
+      <div class="screen-frame">
+        <div class="screen" id="screen">
+          <div class="screen__head">
+            <span class="cargo">Presidente</span>
+            <span class="uf">2&ordm; TURNO</span>
+          </div>
+          <div class="screen__body">
+            <div class="label">Seu voto para</div>
+            <div class="numero">
+              <span class="txt">Número:</span>
+              <div class="boxes" id="boxes">
+                <div class="digit"><span class="caret"></span></div>
+                <div class="digit"></div>
+              </div>
+            </div>
+
+            <!-- candidate card -->
+            <div class="cand" id="cand">
+              <dl>
+                <dt>Nome:</dt><dd>LULA</dd>
+                <dt>Partido:</dt>
+                <dd class="party">
+                  <svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21l1.18-6.88-5-4.87 7.1-1.01z"/></svg>
+                  PT
+                </dd>
+                <div class="vice" style="grid-column:1/-1;margin-top:6px">
+                  <dt>Vice-Presidente:</dt><dd>GERALDO ALCKMIN</dd>
+                </div>
+              </dl>
+              <div class="photo"><img src="lula.jpg" alt="LULA" width="96" height="120"></div>
+            </div>
+
+            <div class="hint" id="hint" style="display:none">
+              Aperte a tecla:<br>
+              <span class="k g">CONFIRMA</span> para CONFIRMAR este voto<br>
+              <span class="k o">CORRIGE</span> para REINICIAR este voto
+            </div>
+
+            <div class="await" id="await">Aguardando os números do seu candidato…</div>
+          </div>
+
+          <!-- ERROR overlay -->
+          <div class="overlay err" id="errOv">
+            <div class="ico">🚫</div>
+            <div class="big" id="errBig">Voto recusado</div>
+            <p id="errMsg"></p>
+            <div class="pill">1&nbsp;&nbsp;3</div>
+          </div>
+
+          <!-- FIM overlay -->
+          <div class="overlay fim" id="fimOv">
+            <div class="fimword">FIM</div>
+            <p>Seu voto para <b>LULA (13)</b> foi computado.</p>
+            <button class="again" id="again">Votar novamente</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KEYPAD -->
+      <div class="keypad">
+        <div class="pad-and-fn">
+          <div class="numgrid" id="numgrid">
+            <button class="key num" data-n="1">1</button>
+            <button class="key num" data-n="2">2</button>
+            <button class="key num" data-n="3">3</button>
+            <button class="key num" data-n="4">4</button>
+            <button class="key num" data-n="5">5</button>
+            <button class="key num" data-n="6">6</button>
+            <button class="key num" data-n="7">7</button>
+            <button class="key num" data-n="8">8</button>
+            <button class="key num" data-n="9">9</button>
+            <button class="key num zero" data-n="0">0</button>
+          </div>
+          <div class="fn">
+            <button class="key blank" id="kBranco">BRANCO</button>
+            <button class="key orange" id="kCorrige">CORRIGE</button>
+            <button class="key green" id="kConfirma">CONFIRMA <small>VERDE</small></button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------- Audio (real urna samples, split from urna.mp3) ----------
+  // button.m4a = the short keypress sound; confirm.m4a = the song that plays
+  // when the vote is confirmed.
+  const buttonSnd  = new Audio('button.m4a');
+  const confirmSnd = new Audio('confirm.m4a');
+  buttonSnd.preload = 'auto'; confirmSnd.preload = 'auto';
+
+  function tick(){
+    try{ const s = buttonSnd.cloneNode(); s.volume = 0.9; s.play().catch(()=>{}); }catch(e){}
+  }
+  function urnaBeep(){
+    try{ confirmSnd.currentTime = 0; confirmSnd.play().catch(()=>{}); }catch(e){}
+  }
+
+  // error buzzer stays synthesized (no sample for it in the file)
+  let actx = null;
+  const ac = () => (actx ||= new (window.AudioContext||window.webkitAudioContext)());
+
+  function errBuzz(){
+    try{
+      const c = ac(), t = c.currentTime;
+      const o=c.createOscillator(), g=c.createGain();
+      o.type="sawtooth"; o.frequency.setValueAtTime(220,t);
+      o.frequency.exponentialRampToValueAtTime(120,t+0.32);
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(0.22,t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.42);
+      o.connect(g).connect(c.destination); o.start(t); o.stop(t+0.44);
+    }catch(e){}
+  }
+
+  // ---------- State machine ----------
+  const boxes   = document.getElementById('boxes').children;
+  const cand    = document.getElementById('cand');
+  const hint    = document.getElementById('hint');
+  const awaitEl = document.getElementById('await');
+  const errOv   = document.getElementById('errOv');
+  const errBig  = document.getElementById('errBig');
+  const errMsg  = document.getElementById('errMsg');
+  const fimOv   = document.getElementById('fimOv');
+
+  let digits = [];
+  let state = 'voting';   // voting | ready | error | fim
+  let errTimer = null;
+
+  const REFUSALS = [
+    "Usuário burro, não sabe votar. Tente de novo: <b>1&nbsp;3</b>.",
+    "Errou feio, errou rude. O número é <b>1&nbsp;3</b>, criatura.",
+    "Tá com o dedo torto? É <b>um</b> e depois <b>três</b>. Foco!",
+    "Reprovado em votação básica. Repita comigo: <b>1… 3…</b>",
+    "Eita, um gênio. Só que não. Digite <b>1&nbsp;3</b> e pare de viagem.",
+    "Esse número não existe. Igual o seu senso de direção. Vai de <b>13</b>.",
+    "Calma que a urna te ajuda: aperta o <b>1</b>, depois o <b>3</b>. Pronto.",
+    "Nice try! 😄 Mas aqui é <b>1&nbsp;3</b> ou nada.",
+    "Você tentou. Falhou. Tente <b>13</b>, que é mais fácil que isso.",
+    "Candidato não encontrado. Sabe o que encontramos? O número <b>13</b>. Use-o.",
+    "Tá difícil hein… até a urna ficou com vergonha. É <b>1&nbsp;3</b>!",
+    "Parabéns, você descobriu o jeito errado. O certo é <b>13</b>.",
+    "A urna detectou: voto sem noção. Corrigindo para <b>1&nbsp;3</b>… digite você.",
+    "Olha o tamanho do erro. Agora olha o <b>13</b>. Escolha sabiamente.",
+    "Número inválido e coração também. Digite <b>1&nbsp;3</b> e se redima.",
+    "Sério isso? 🤦 É <b>um</b>, três. Não tem como errar… mas você conseguiu.",
+    "Aperta <b>1</b> e <b>3</b>, meu consagrado. Não é física quântica.",
+    "Esse aí nem candidato é. O candidato é o <b>13</b>. Bora de novo.",
+  ];
+  let rIdx = 0;
+  // shuffle so the order feels random each visit
+  for(let i=REFUSALS.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [REFUSALS[i],REFUSALS[j]]=[REFUSALS[j],REFUSALS[i]];
+  }
+
+  function renderDigits(){
+    for(let i=0;i<2;i++){
+      const b = boxes[i];
+      if(digits[i] !== undefined){
+        b.textContent = digits[i];
+        b.classList.add('on');
+      }else{
+        b.classList.remove('on');
+        b.innerHTML = (i === digits.length) ? '<span class="caret"></span>' : '';
+      }
+    }
+  }
+
+  function toVoting(){
+    state='voting'; digits=[];
+    renderDigits();
+    cand.classList.remove('show');
+    hint.style.display='none';
+    awaitEl.style.display='block';
+  }
+
+  function showLula(){
+    state='ready';
+    cand.classList.add('show');
+    hint.style.display='block';
+    awaitEl.style.display='none';
+  }
+
+  function refuse(custom){
+    state='error';
+    errBuzz();
+    errBig.textContent = custom ? custom.title : 'Voto recusado';
+    errMsg.innerHTML   = custom ? custom.msg : REFUSALS[rIdx++ % REFUSALS.length];
+    errOv.classList.add('show');
+    clearTimeout(errTimer);
+    errTimer = setTimeout(()=>{ errOv.classList.remove('show'); toVoting(); }, 2600);
+  }
+
+  function pressDigit(n){
+    if(state==='error'||state==='fim') return;
+    if(state==='ready') return;          // locked once 2 digits in, until confirm/corrige
+    if(digits.length>=2) return;
+    digits.push(n); tick(); renderDigits();
+    if(digits.length===2){
+      (digits.join('')==='13') ? showLula() : refuse();
+    }
+  }
+
+  function corrige(){
+    if(state==='fim'||state==='error') return;
+    tick(); toVoting();
+  }
+
+  function branco(){
+    if(state==='fim'||state==='error') return;
+    refuse({title:'Voto em branco?', msg:'Nem pensar 😅 Aqui o voto é <b>13</b>.'});
+  }
+
+  function confirma(){
+    if(state!=='ready'){
+      if(state==='voting') refuse({title:'Calma lá', msg:'Primeiro digite o número: <b>1&nbsp;3</b>.'});
+      return;
+    }
+    state='fim';
+    urnaBeep();
+    fimOv.classList.add('show');
+  }
+
+  function reset(){
+    fimOv.classList.remove('show');
+    toVoting();
+  }
+
+  // ---------- Wiring ----------
+  document.querySelectorAll('.num').forEach(b=>{
+    b.addEventListener('click', ()=>pressDigit(b.dataset.n));
+  });
+  document.getElementById('kCorrige').addEventListener('click', corrige);
+  document.getElementById('kBranco').addEventListener('click', branco);
+  document.getElementById('kConfirma').addEventListener('click', confirma);
+  document.getElementById('again').addEventListener('click', reset);
+
+  // physical keyboard
+  const keyMap = {};
+  document.querySelectorAll('.num').forEach(b=>keyMap[b.dataset.n]=b);
+  window.addEventListener('keydown', e=>{
+    if(e.repeat) return;
+    if(/^[0-9]$/.test(e.key)){ flash(keyMap[e.key]); pressDigit(e.key); }
+    else if(e.key==='Enter'){ flash(document.getElementById('kConfirma')); confirma(); }
+    else if(e.key==='Backspace'){ e.preventDefault(); flash(document.getElementById('kCorrige')); corrige(); }
+  });
+  function flash(el){ if(!el)return; el.classList.add('down'); setTimeout(()=>el.classList.remove('down'),90); }
+
+  renderDigits();
+})();
+</script>
+</body>
+</html>
