@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="18%" r="95%">
+      <stop offset="0%" stop-color="#23262b"/>
+      <stop offset="55%" stop-color="#15171a"/>
+      <stop offset="100%" stop-color="#0c0d0f"/>
+    </radialGradient>
+    <linearGradient id="case" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8e3d6"/>
+      <stop offset="100%" stop-color="#bdb6a4"/>
+    </linearGradient>
+    <linearGradient id="grn" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2aa64c"/>
+      <stop offset="100%" stop-color="#15692c"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="1200" fill="url(#bg)"/>
+
+  <!-- header: star + wordmark -->
+  <g transform="translate(600,150)" text-anchor="middle">
+    <path transform="translate(-150,-66) scale(2.7)" fill="#e23b32" d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21l1.18-6.88-5-4.87 7.1-1.01z"/>
+    <text x="40" y="0" font-family="Oswald, Arial, sans-serif" font-weight="700" font-size="92" fill="#ffffff">vote<tspan fill="#27c24c">13</tspan>.pt</text>
+  </g>
+  <text x="600" y="246" text-anchor="middle" font-family="Oswald, Arial, sans-serif" font-weight="600" font-size="40" fill="#cfd3cf" letter-spacing="2">SIMULADOR DA URNA ELETRÔNICA</text>
+
+  <!-- urna card -->
+  <g transform="translate(310,330)">
+    <rect x="0" y="0" width="580" height="470" rx="34" fill="url(#case)"/>
+    <rect x="40" y="42" width="500" height="250" rx="16" fill="#eef2ea" stroke="#9b9482" stroke-width="8"/>
+    <text x="68" y="98" font-family="Oswald, Arial Narrow, sans-serif" font-weight="700" font-size="34" fill="#1d2b22" letter-spacing="3">PRESIDENTE</text>
+    <rect x="68" y="126" width="108" height="138" rx="8" fill="#fbfdfa" stroke="#243a2c" stroke-width="7"/>
+    <rect x="196" y="126" width="108" height="138" rx="8" fill="#fbfdfa" stroke="#243a2c" stroke-width="7"/>
+    <text x="122" y="232" font-family="Menlo, monospace" font-weight="700" font-size="104" fill="#15251b" text-anchor="middle">1</text>
+    <text x="250" y="232" font-family="Menlo, monospace" font-weight="700" font-size="104" fill="#15251b" text-anchor="middle">3</text>
+    <!-- LULA tag -->
+    <text x="346" y="170" font-family="IBM Plex Sans, Arial, sans-serif" font-weight="700" font-size="40" fill="#15251b">LULA</text>
+    <text x="346" y="212" font-family="IBM Plex Sans, Arial, sans-serif" font-weight="600" font-size="26" fill="#c1271f">★ PT &#183; 13</text>
+    <!-- confirma key -->
+    <rect x="346" y="330" width="194" height="80" rx="14" fill="url(#grn)"/>
+    <text x="443" y="382" font-family="Arial, sans-serif" font-weight="700" font-size="30" fill="#fff" text-anchor="middle" letter-spacing="2">CONFIRMA</text>
+  </g>
+
+  <!-- footer tagline -->
+  <text x="600" y="900" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-weight="500" font-size="38" fill="#9aa09a">Aqui só tem um jeito de votar:</text>
+  <text x="600" y="996" text-anchor="middle" font-family="Oswald, Arial, sans-serif" font-weight="700" font-size="96" fill="#27c24c" letter-spacing="14">1 &#8201; 3</text>
+  <text x="600" y="1086" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-weight="400" font-size="30" fill="#7d827d">Digite qualquer outro número e a urna recusa. 😏</text>
+</svg>

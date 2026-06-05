@@ -3,9 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>vote13.pt — Urna Eletrônica</title>
-<meta name="description" content="Simulador de urna eletrônica. Aqui só tem um jeito: 1 3.">
+<title>vote13.pt — Simulador de Urna Eletrônica (vote 13!)</title>
+<meta name="description" content="Simulador da urna eletrônica brasileira que só aceita um voto: o 13. Digite, ouça o som da urna e confirme. Qualquer outro número? A urna recusa na hora. 🌟">
+<meta name="keywords" content="urna eletrônica, simulador de urna, votar 13, urna, Lula, PT, voto, eleições, Brasil, urna online">
+<meta name="author" content="vote13.pt">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#15171a">
+<link rel="canonical" href="https://vote13.pt/">
+
+<!-- Open Graph (WhatsApp, Telegram, Facebook, iMessage) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="vote13.pt">
+<meta property="og:title" content="vote13.pt — Simulador de Urna Eletrônica">
+<meta property="og:description" content="A urna que só aceita um voto: o 13. Digite, ouça o som e confirme. Qualquer outro número? Recusado na hora. 😏">
+<meta property="og:url" content="https://vote13.pt/">
+<meta property="og:image" content="https://vote13.pt/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta property="og:image:alt" content="Urna eletrônica mostrando o número 13 — LULA — e a tecla CONFIRMA.">
+<meta property="og:locale" content="pt_BR">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="vote13.pt — Simulador de Urna Eletrônica">
+<meta name="twitter:description" content="A urna que só aceita um voto: o 13. Digite, ouça o som e confirme. 😏">
+<meta name="twitter:image" content="https://vote13.pt/og.png">
+<meta name="twitter:image:alt" content="Urna eletrônica mostrando o número 13 — LULA.">
+
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23c1271f' d='M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77 5.82 21l1.18-6.88-5-4.87 7.1-1.01z'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="https://vote13.pt/og.png">
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "vote13.pt — Simulador de Urna Eletrônica",
+  "url": "https://vote13.pt/",
+  "description": "Simulador da urna eletrônica brasileira que só aceita o voto 13.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "pt-BR",
+  "image": "https://vote13.pt/og.png",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" }
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -31,6 +74,7 @@
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   html,body{height:100%}
   body{
     font-family:"IBM Plex Sans",sans-serif;
@@ -317,6 +361,7 @@
 </head>
 <body>
   <div class="wrap">
+    <h1 class="sr-only">vote13.pt — Simulador de Urna Eletrônica. A urna brasileira que só aceita o voto 13 (Lula, PT). Digite o número, ouça o som da urna e confirme.</h1>
     <main class="urna" id="urna">
       <div class="urna__brandstrip">
         <span class="gov">Justiça <b>Eleitoral</b> · Brasil</span>

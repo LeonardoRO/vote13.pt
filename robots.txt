@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vote13.pt/sitemap.xml
